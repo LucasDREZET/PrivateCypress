@@ -1,0 +1,87 @@
+name: Cypress
+on:
+  workflow_dispatch:
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Put code
+        run: echo "${{ secrets.CODE }}" >> ./cypress/integration/test.js
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          record: false
+          browser: chrome
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: screens
+          path: /home/runner/work/Vacation/Vacation/cypress/screenshots/
+
+  notif-success:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ job.status }}
+    needs: cypress-run
+    if: ${{ failure() }}
+
+    steps:
+      - name: Retrieve artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: screens
+
+      - name: Check files
+        run: ls ./test.js/timeslots.png
+      
+      - name: Notification
+        uses: appleboy/discord-action@0.0.3
+        with:
+          webhook_id: ${{ secrets.WEBHOOK_ID_SUCCESS }}
+          webhook_token: ${{ secrets.WEBHOOK_TOKEN_SUCCESS }}
+          file: "./test.js/timeslots.png"
+          message: ${{ secrets.MESSAGE }}
+
+  notif-fail:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ job.status }}
+    needs: cypress-run
+    if: ${{ success() }}
+
+    steps:
+      - name: Retrieve artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: screens
+
+      - name: Check files
+        run: ls ./test.js/timeslots.png
+      
+      - name: Notification
+        uses: appleboy/discord-action@0.0.3
+        with:
+          webhook_id: ${{ secrets.WEBHOOK_ID_FAIL }}
+          webhook_token: ${{ secrets.WEBHOOK_TOKEN_FAIL }}
+          file: "./test.js/timeslots.png"
+          message: "Fail"
+
+  relaunch:
+    runs-on: ubuntu-latest
+    needs: [notif-success, notif-fail]
+    if: ${{ always() }}
+
+    steps:
+      - name: Launch new workflow
+        if: ${{ needs.notif-success.outputs.valid == 'failure' || needs.notif-fail.outputs.valid == 'success' }}
+        run: curl   -X POST   -H "Accept:application/vnd.github.v3+json"   https://api.github.com/repos/LucasDREZET/Vacation/actions/workflows/cypress.yml/dispatches   -u ${{ secrets.USER }}:${{ secrets.PAT }}   -d '{"ref":"main"}'
