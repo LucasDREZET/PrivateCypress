@@ -89,4 +89,4 @@ jobs:
 
       - name: Launch new workflow
         if: ${{ needs.notif-success.outputs.valid == 'failure' || needs.notif-fail.outputs.valid == 'success' }}
-        run: curl   -X POST   -H "Accept:application/vnd.github.v3+json"   https://api.github.com/repos/LucasDREZET/Vacation/actions/workflows/cypress.yml/dispatches   -u ${{ secrets.USER }}:${{ secrets.PAT }}   -d '{"ref":"main"}'
+        run: curl   -X POST   -H "Accept:application/vnd.github.v3+json"   https://api.github.com/repos/LucasDREZET/PrivateCypress/actions/workflows/cypress.yml/dispatches   -u ${{ secrets.USER }}:${{ secrets.PAT }}   -d '{"ref":"main"}'
