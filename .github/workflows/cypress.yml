@@ -26,7 +26,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: screens
-          path: /home/runner/work/Vacation/Vacation/cypress/screenshots/
+          path: ./cypress/screenshots/
 
   notif-success:
     runs-on: ubuntu-latest
