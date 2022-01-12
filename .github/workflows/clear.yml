@@ -1,8 +1,6 @@
 name: Clear
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '5/10 * * * * '
 
 jobs:
   clear:
