@@ -2,7 +2,7 @@ name: Clear
 on:
   workflow_dispatch:
   schedule:
-    - cron: '3/10 * * * * '
+    - cron: '5/10 * * * * '
 
 jobs:
   clear:
