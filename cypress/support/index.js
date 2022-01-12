@@ -21,5 +21,6 @@ import './commands'
 require('cypress-xpath')
 
 Cypress.Screenshot.defaults({
-    capture: 'fullPage'
+    capture: 'fullPage',
+    screenshotOnRunFailure: false
 })
