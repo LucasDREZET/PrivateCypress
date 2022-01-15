@@ -35,6 +35,11 @@ jobs:
         if: ${{ steps.cypress.outcome == 'success' }}
         run: curl -F "file1=@cypress/screenshots/test.js/dispo.png" ${{ secrets.WEBHOOK_FAIL }}
         continue-on-error: true
+        
+      - name: Notification crash
+        id: crashNotif
+        if: ${{ steps.cypress.outcome == 'failure' && steps.file.outcome == 'failure' }}
+        run: curl -F 'payload_json={"content":"${{ github.run_id }}, ${{ github.run_number }}, ${{ github.run_attempt }}"}' ${{ secrets.WEBHOOK_FAIL }}
 
       - name: Notification success
         id: successNotif
