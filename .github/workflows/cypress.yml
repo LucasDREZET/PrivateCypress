@@ -43,5 +43,5 @@ jobs:
         continue-on-error: true
 
       - name: Launch new workflow
-        if: ${{ steps.failureNotif.outcome == 'success' || steps.file.outcome == 'failure' }}
+        if: ${{ always() }}
         run: curl -X POST -H "Accept:application/vnd.github.v3+json" https://api.github.com/repos/LucasDREZET/PrivateCypress/actions/workflows/cypress.yml/dispatches -u ${{ secrets.USER }}:${{ secrets.PAT }} -d '{"ref":"main"}'
