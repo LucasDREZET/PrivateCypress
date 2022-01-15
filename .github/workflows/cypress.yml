@@ -8,76 +8,40 @@ jobs:
 
     steps:
       - name: Checkout
+        id: checkout
         uses: actions/checkout@v2
 
       - name: Put code
+        id: putCode
         run: echo "${{ secrets.CODE }}" >> ./cypress/integration/test.js
 
       - name: Cypress run
+        id: cypress
         uses: cypress-io/github-action@v2
         with:
           record: false
           browser: chrome
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload screenshot
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: screens
-          path: ./cypress/screenshots/
-
-  notif-success:
-    runs-on: ubuntu-latest
-    outputs:
-      valid: ${{ job.status }}
-    needs: cypress-run
-    if: ${{ failure() }}
-
-    steps:
-      - name: Retrieve artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: screens
+        continue-on-error: true
 
       - name: Check files
-        run: ls ./test.js/dispo.png
-      
-      - name: Notification
-        uses: appleboy/discord-action@0.0.3
-        with:
-          webhook_id: ${{ secrets.WEBHOOK_ID_SUCCESS }}
-          webhook_token: ${{ secrets.WEBHOOK_TOKEN_SUCCESS }}
-          file: "./test.js/dispo.png"
-          message: ${{ secrets.MESSAGE }}
+        id: file
+        run: ls ./cypress/screenshots/test.js/dispo.png
+        continue-on-error: true
 
-  notif-fail:
-    runs-on: ubuntu-latest
-    outputs:
-      valid: ${{ job.status }}
-    needs: cypress-run
-    if: ${{ success() }}
+      - name: Notification failure
+        id: failureNotif
+        if: ${{ steps.cypress.outcome == 'success' }}
+        run: curl -F "file1=@cypress/screenshots/test.js/dispo.png" ${{ secrets.WEBHOOK_FAIL }}
+        continue-on-error: true
 
-    steps:
-      - name: Retrieve artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: screens
-        
-      - name: Notification
-        run: curl -F 'payload_json={"content":"${{ secrets.MESSAGE }}"}' -F "file1=@test.js/dispo.png" ${{ secrets.WEBHOOK_FAIL }}
+      - name: Notification success
+        id: successNotif
+        if: ${{ steps.cypress.outcome == 'failure' && steps.file.outcome == 'success' }}
+        run: curl -F 'payload_json={"content":"${{ secrets.MESSAGE }}"}' -F "file1=@cypress/screenshots/test.js/dispo.png" ${{ secrets.WEBHOOK_SUCCESS }}
+        continue-on-error: true
 
-  relaunch:
-    runs-on: ubuntu-latest
-    needs: [notif-success, notif-fail]
-    if: ${{ always() }}
-
-    steps:
       - name: Launch new workflow
-        if: ${{ needs.notif-success.outputs.valid == 'failure' || needs.notif-fail.outputs.valid == 'success' }}
+        if: ${{ steps.failureNotif.outcome == 'success' || steps.file.outcome == 'failure' }}
         run: curl -X POST -H "Accept:application/vnd.github.v3+json" https://api.github.com/repos/LucasDREZET/PrivateCypress/actions/workflows/cypress.yml/dispatches -u ${{ secrets.USER }}:${{ secrets.PAT }} -d '{"ref":"main"}'
-
-      - name: Clear artifacts
-        if: ${{ always() }}
-        run: curl -X POST -H "Accept:application/vnd.github.v3+json" https://api.github.com/repos/LucasDREZET/PrivateCypress/actions/workflows/clear.yml/dispatches -u ${{ secrets.USER }}:${{ secrets.PAT }} -d '{"ref":"main"}'
