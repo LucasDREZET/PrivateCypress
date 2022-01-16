@@ -44,7 +44,7 @@ jobs:
       - name: Notification success
         id: successNotif
         if: ${{ steps.cypress.outcome == 'failure' && steps.file.outcome == 'success' }}
-        run: curl -F 'payload_json={"content":"${{ secrets.MESSAGE }}"}' -F "file1=@cypress/screenshots/test.js/dispo.png" ${{ secrets.WEBHOOK_SUCCESS }}
+        run: curl -F 'payload_json={"content":"${{ secrets.MESSAGE }}"}' ${{ secrets.WEBHOOK_SUCCESS }}
         continue-on-error: true
 
       - name: Launch new workflow
