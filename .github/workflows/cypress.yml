@@ -23,6 +23,10 @@ jobs:
           browser: chrome
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Notification failure
+        if: ${{ failure() }}
+        run: curl -H "Content-Type:application/json" -d '{"content":"https://github.com/LucasDREZET/PrivateCypress/actions/runs/${{ github.run_id }}"}' $WEBHOOK_FAIL
 
       - name: Launch new workflow
         if: ${{ always() }}
