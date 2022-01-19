@@ -21,6 +21,9 @@ jobs:
       - name: Change success message
         run: sed -i 's@SUCCESS_MESSAGE@${{ secrets.SUCCESS_MESSAGE }}@' ./cypress/integration/test.js
 
+      - name: See
+        run: cat ./cypress/integration/test.js
+
       - name: Cypress run
         id: cypress
         uses: cypress-io/github-action@v2
