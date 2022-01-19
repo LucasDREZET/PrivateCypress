@@ -26,7 +26,7 @@ jobs:
           
       - name: Notification failure
         if: ${{ failure() }}
-        run: curl -H "Content-Type:application/json" -d '{"content":"https://github.com/LucasDREZET/PrivateCypress/actions/runs/${{ github.run_id }}"}' $WEBHOOK_FAIL
+        run: curl -H "Content-Type:application/json" -d '{"content":"https://github.com/LucasDREZET/PrivateCypress/actions/runs/${{ github.run_id }}"}' ${{ secrets.WEBHOOK_FAIL }}
 
       - name: Launch new workflow
         if: ${{ always() }}
