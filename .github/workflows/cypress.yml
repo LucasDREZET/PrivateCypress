@@ -14,13 +14,7 @@ jobs:
       - name: Put code
         id: putCode
         run: echo "${{ secrets.CODE }}" >> ./cypress/integration/test.js
-
-      - name: Change fail message
-        run: sed -i 's@FAIL_MESSAGE@${{ secrets.FAIL_MESSAGE }}@' ./cypress/integration/test.js
-
-      - name: Change success message
-        run: sed -i 's@SUCCESS_MESSAGE@${{ secrets.SUCCESS_MESSAGE }}@' ./cypress/integration/test.js
-
+        
       - name: See
         run: cat ./cypress/integration/test.js
 
